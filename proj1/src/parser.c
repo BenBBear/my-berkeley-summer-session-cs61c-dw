@@ -12,6 +12,8 @@
 		r_tree->last_child =m_last_child;					\
 	} while(0)
 
+int fun_call_mark = 0;
+
 /** An array of the different string values of keywords. */
 char *keywords[] = {"and", "or", "+", "-", "*", "/", "lt", "eq",
 					"function", "struct", "arrow", "assign", "if",
@@ -64,12 +66,15 @@ AST *build_ast (lexer *lex) { 	/* a big one!! */
 	case token_OPEN_PAREN:
 		/* here we need a while loop */
 		read_token(lex);
-		r_tree = build_ast(lex);
-		read_token(lex);
+		fun_call_mark = 1;
+		r_tree = build_ast(lex); /* here we expect a keyword,var_name */
+		/* read_token(lex); */
 		if (lex->type != token_CLOSE_PAREN){
 			free_ast(r_tree);
 			perror("Parentheses not match!!");
 			return NULL;
+		}else{
+			read_token(lex);	/* if ok,skip this close  parentheses */
 		}
 		break;
 	case token_END:
@@ -82,9 +87,48 @@ AST *build_ast (lexer *lex) { 	/* a big one!! */
 	case token_CLOSE_PAREN: 	/* also impossible in here */
 		break;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	case token_KEYWORD:			/* todo */
-		break;
-	case token_NAME: 			/* todo */
+	case token_KEYWORD:			/* todo *///only build the tree here,don't modify the symbol table
+		ASTREE_NODE(r_tree, lookup_keyword_enum(lex->buffer), NULL, NULL); /* the node_keyword and node_name only differs in here */
+		read_token(lex);
+		while(lex->type != token_CLOSE_PAREN){
+			if(r_tree->children == NULL){
+				r_tree->children  = malloc(sizeof(AST_lst));
+				r_tree->children->next = NULL;
+				r_tree->children->val = build_ast(lex);
+				r_tree->last_child = r_tree->children;
+			}else{
+				r_tree->last_child->next = malloc(sizeof(AST_lst));
+				r_tree->last_child = r_tree->last_child->next;
+
+				r_tree->last_child->val = build_ast(lex);
+				r_tree->last_child->next = NULL;
+			}
+			read_token(lex);
+		}
+		break;					/* must leave  */
+	case token_NAME:
+		if(fun_call_mark == 1){
+			fun_call_mark = 0;
+			ASTREE_NODE(r_tree, node_VAR, NULL, NULL); /* the node_keyword and node_name only differs in here */
+			read_token(lex);
+			while(lex->type != token_CLOSE_PAREN){
+				if(r_tree->children == NULL){
+					r_tree->children  = malloc(sizeof(AST_lst));
+					r_tree->children->next = NULL;
+					r_tree->children->val = build_ast(lex);
+					r_tree->last_child = r_tree->children;
+				}else{
+					r_tree->last_child->next = malloc(sizeof(AST_lst));
+					r_tree->last_child = r_tree->last_child->next;
+
+					r_tree->last_child->val = build_ast(lex);
+					r_tree->last_child->next = NULL;
+				}
+				read_token(lex);
+			}
+		}else{
+			ASTREE_NODE(r_tree, node_VAR, NULL, NULL); /* the node_keyword and node_name only differs in here */
+		}
 		break;
 	}
     return r_tree;
