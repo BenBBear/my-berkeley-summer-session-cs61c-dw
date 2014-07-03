@@ -3,8 +3,10 @@
 
 /** A counter to prevent the issuance of duplicate labels. */
 unsigned label_count = 0;
+
 /** True iff the data segment has already been partially printed. */
 int data_seg_opened = 0;
+
 /** True iff the text segment has already been partially printed. */
 int text_seg_opened = 0;
 
