@@ -1,0 +1,13 @@
+(struct 1 3 "hello" "world")
+(assign x (struct 2 4 "hello" "world"))
+
+(intprint (arrow x 0))
+
+(intprint (arrow x 1))
+
+(stringprint (arrow x 2))
+
+
+(assign (arrow x 0) 10)
+
+(intprint (arrow x 0))

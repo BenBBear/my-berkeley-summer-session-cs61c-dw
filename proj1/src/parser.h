@@ -90,7 +90,7 @@ extern smap *num_args;
 
 /** Holds a reference to each of the different string literals appearing throughout
  *  the program. */
-extern smap_l *strings;
+/* extern smap_l *strings; */
 
 
 void my_perror(const char *fmt, ...);

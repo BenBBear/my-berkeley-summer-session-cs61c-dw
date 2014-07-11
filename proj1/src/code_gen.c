@@ -22,6 +22,9 @@ unsigned int _number = 0;
 #define FOR_LABEL_AGAIN _label
 #define FOR_LABEL_OUT _label2
 
+#define IF_LABEL_TRUE _label
+#define IF_LABEL_FALSE _label2
+
 #define LOOP_LABEL_AGAIN _label
 #define LOOP_LABEL_OUT _label2
 
@@ -37,7 +40,6 @@ int push_counter = 0;
 #define STACK_COUNTER push_counter
 
 
-
 #define ON 1
 #define OFF 0
 int assign_mark = 0;
@@ -45,28 +47,29 @@ int assign_mark = 0;
 #define TURN_OFF_ASSIGN() assign_mark = 0
 #define ASSIGN_MARK assign_mark
 
+#define NOT(x) !(x)
 
 #define GET_LABEL()do{										\
-		sprintf(_label,"LABEL%d",_number++);				\
-	}while(0)
+					  sprintf(_label,"LABEL%d",_number++);	\
+					  }while(0)
 
-#define GET_LABEL2()do{										\
-		sprintf(_label2,"LABEL%d",_number++);				\
+#define GET_LABEL2()do{							\
+		sprintf(_label2,"LABEL%d",_number++);	\
 	}while(0)
 
 #define PUSHAA()do{									\
 		printf("\tpushaa\n");						\
 		ADD_STACK_COUNTER();ADD_STACK_COUNTER();	\
-}while(0)
+	}while(0)
 #define POPAA() do{ printf("\tpopaa\n");			\
 		SUB_STACK_COUNTER();SUB_STACK_COUNTER();	\
-}while(0)
+	}while(0)
 #define PUSH(x)do{  printf("\tpush %s\n",x);	\
 		ADD_STACK_COUNTER();					\
-}while(0)
-#define POP(x) do{ printf("\tpop %s\n",x);			\
-		SUB_STACK_COUNTER();						\
-			}while(0)
+	}while(0)
+#define POP(x) do{ printf("\tpop %s\n",x);		\
+		SUB_STACK_COUNTER();					\
+	}while(0)
 #define MOVE(x,y) printf("\tmove %s,%s\n",x,y)
 #define LW(x,y) printf("\tlw %s,%s\n",x,y)
 #define SW(x,y) printf("\tsw %s,%s\n",x,y)
@@ -93,16 +96,18 @@ int assign_mark = 0;
 		emit_main(chd->val,fmark);				\
 		PUSH("$v0");							\
 		emit_main(chd->next->val,fmark);		\
-		MOVE("$v0", "$a1");						\
+		MOVE("$a1", "$v0");						\
 		POP("$a0");								\
 	}while(0)
 
 
-
+#define NULL_CHECK(x) if(x == NULL){			\
+		return;									\
+	}
 #define REWIND_STACK() while(arg_number > 0){	\
-		arg_number--;								\
-		POP("$zero");								\
-		}
+		arg_number--;							\
+		POP("$zero");							\
+	}
 
 /** True iff the data segment has already been partially printed. */
 int data_seg_opened = 0;
@@ -114,49 +119,58 @@ smap* var_addr;
 /* use
    testAB: .asciiz  "Testing linked lists A and B (should be 0): " */
 void emit_strings(AST *ast) {
-		if (ast->type == node_STRING){
-			GET_LABEL();
-			printf("%s: .asciiz %s\n",LABEL,ast->val);
-			strcpy(ast->val,LABEL);
-			return;
-		}else{
-			AST_lst* chd = ast->children;
-			while(chd){
-				emit_strings(chd->val);
-				chd = chd->next;
-			}
-			return;
+	NULL_CHECK(ast);
+	if (ast->type == node_STRING){
+		GET_LABEL();
+		printf("%s: .asciiz \"%s\"\n",LABEL,ast->val);
+		strcpy(ast->val,LABEL);
+		return;
+	}else{
+		AST_lst* chd = ast->children;
+		while(chd){
+			emit_strings(chd->val);
+			chd = chd->next;
 		}
+		return;
+	}
 }
 void emit_structs(AST *ast){
+	NULL_CHECK(ast);
 	unsigned int i = 0;
 	if (ast->type == node_STRUCT){
-			GET_LABEL();
-			printf("%s: .word ",LABEL);
+		GET_LABEL();
+		printf("%s: .word ",LABEL);
 
-			for(i = 0; i <AST_lst_len(ast->children);i++)
-				printf("0 ");  	/* variable also use this method */
+		for(i = 0; i <AST_lst_len(ast->children);i++)
+			printf("0 ");  	/* variable also use this method */
 
-			printf("\n");
-			strcpy(ast->val,LABEL);
-			return;
-		}else{
-			AST_lst* chd = ast->children;
-			while(chd){
-				emit_structs(chd->val);
-				chd = chd->next;
-			}
-			return;
+		printf("\n");
+		strcpy(ast->val,LABEL);
+		return;
+	}else{
+		AST_lst* chd = ast->children;
+		while(chd){
+			emit_structs(chd->val);
+			chd = chd->next;
+		}
+		return;
 	}
 }
 
 
 void emit_globals(AST *ast){
+	NULL_CHECK(ast);
 	if (ast->type != node_FUNCTION){
 		if (ast->type == node_ASSIGN){
 			GET_LABEL();
 			smap_put(var_addr, ast->children->val->val, _number-1);
-			printf("%s: .word 0",LABEL);
+			printf("%s: .word 0\n",LABEL);
+		}else{
+			AST_lst* chd = ast->children;
+			while(chd){
+				emit_globals(chd->val);
+				chd = chd->next;
+			}
 		}
 	}else{
 		return;
@@ -168,43 +182,42 @@ void emit_globals(AST *ast){
    C5:	.word 2 0
    C4:	.word 5 C5*/
 void emit_static_memory() {
-	printf(".data\n");
+	printf(".data\n\n");
 }
 
 void emit_text(){
 	printf("\t.text\n");
 	printf("\t.globl main\n");
-	printf("j  main");
+	printf("\tj  main\n\n\n");
+
+	printf("\tmain:\n");
 }
 
 
 char varaddress[20];
 void emit_main(AST *ast,int fmark) {
+	NULL_CHECK(ast);
 	AST_lst* chd = ast->children;
 	int struct_mem_count = 0;
 	if (ast->type == node_FUNCTION){
+		MOVE("$v0","$zero");
 		return;
 	}else{
 
 		switch(ast->type){
 			///////////////////////////////////////////////////////////////////////////single value
 		case node_VAR:
-			if (fmark == 0 || strchr(ast->val,'-')){
+			if (fmark == 0 || NOT(strchr(ast->val,'-'))){
 				sprintf(varaddress,"LABEL%d",smap_get(var_addr, ast->val));
-				if (ASSIGN_MARK == ON){
-					LA("$v0", varaddress);
-				}else{
-					LA("$v0", varaddress);
-					LW("$v0","0($v0)");
-				}
+
+				LA("$v1", varaddress);
+				LW("$v0","0($v1)");
+
 			}else{
 				GET_STACK_DIFF(smap_get(var_addr,ast->val));
-				if (ASSIGN_MARK == ON){
-					ADD("$v0","$sp",LOCAL_VAR_ADDRESS);
-				}else{
-					ADD("$v0","$sp",LOCAL_VAR_ADDRESS);
-					LW("$v0","0($v0)");
-				}
+
+				ADD("$v1","$sp",LOCAL_VAR_ADDRESS);
+				LW("$v0","0($v1)");
 			}
 			TURN_OFF_ASSIGN();
 			break;
@@ -234,12 +247,16 @@ void emit_main(AST *ast,int fmark) {
 			break;
 			/////////////////////////////////////////////////////////////////////////////two args
 		case  node_ASSIGN:
-			TURN_ON_ASSIGN();
-			PROLOG_OF_TWO();
+			PUSHAA();
+			emit_main(chd->val,fmark);
+			PUSH("$v1");
+			emit_main(chd->next->val,fmark);
+			MOVE("$a1", "$v0");
+			POP("$a0");
 
 			SW("$a1","0($a0)");	/* here the a0 should be the address of the variable*/
 			/* in other case the a0 should be the value of the variable */
-			MOVE("$a1","$v0"); /* return the value of the variable */
+			MOVE("$v0","$a1"); /* return the value of the variable */
 
 			POPAA();
 			break;
@@ -247,7 +264,7 @@ void emit_main(AST *ast,int fmark) {
 		case node_EQ:
 			PROLOG_OF_TWO();
 
-			SEQ("v0","$a0","$a1");
+			SEQ("$v0","$a0","$a1");
 
 			POPAA();
 			break;
@@ -297,6 +314,7 @@ void emit_main(AST *ast,int fmark) {
 			MUL("$a1","$a1","4");
 			ADD("$a1","$a1","$a0");
 			LW("$v0","0($a1)");
+			MOVE("$v1","$a1");
 			POPAA();
 			break;
 
@@ -305,10 +323,13 @@ void emit_main(AST *ast,int fmark) {
 		case node_IF:
 			emit_main(ast->children->val,fmark);
 			GET_LABEL();
-			BEQ("$v0","$zero",LABEL);
+			GET_LABEL2();		/* make sense until now */
+			BEQ("$v0","$zero",IF_LABEL_FALSE);
 			emit_main(ast->children->next->val,fmark);
-			PUT_LABEL(LABEL);
+			J(IF_LABEL_TRUE);
+			PUT_LABEL(IF_LABEL_FALSE);
 			emit_main(ast->children->next->next->val,fmark);
+			PUT_LABEL(IF_LABEL_TRUE);
 			break;
 
 		case node_CALL:
@@ -341,10 +362,10 @@ void emit_main(AST *ast,int fmark) {
 
 		case node_WHILE:
 			PUSHAA();
-			emit_main(ast->children->val, fmark);
 			GET_LABEL();
 			GET_LABEL2();
 			PUT_LABEL(LOOP_LABEL_AGAIN);
+			emit_main(ast->children->val, fmark);
 
 			BEQ("$v0","$zero",LOOP_LABEL_OUT);
 
@@ -369,13 +390,12 @@ void emit_main(AST *ast,int fmark) {
 			break;
 			/////////////////////////error///////////////////////////////////////
 		case node_FUNCTION:
-			my_perror("Should not been here");
 			break;
 			//////////////////////////system call////////////////////////////////////
 		case node_I_PRINT:
 			PUSHAA();
 			emit_main(ast->children->val, fmark);
-			MOVE("$v0","$a0");
+			MOVE("$a0","$v0");
 			LI("$v0","1");
 			SYSCALL();
 			POPAA();
@@ -383,7 +403,7 @@ void emit_main(AST *ast,int fmark) {
 		case node_S_PRINT:
 			PUSHAA();
 			emit_main(ast->children->val, fmark);
-			MOVE("$v0","$a0");
+			MOVE("$a0","$v0");
 			LI("$v0","4");
 			SYSCALL();
 			POPAA();
@@ -405,8 +425,8 @@ void emit_main(AST *ast,int fmark) {
 }
 
 void emit_exit() {
-    printf("    li $v0 10\n");
-    printf("    syscall\n");
+    printf("\tli $v0 10\n");
+    printf("\tsyscall\n");
 }
 
 
@@ -437,9 +457,9 @@ void emit_functions(AST *ast) {
 
 		while(BODY){
 			FBODY_PART = BODY->val;
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			emit_main(FBODY_PART, 1);
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			BODY = BODY->next;
 		}
 		POP("$ra");
@@ -471,55 +491,6 @@ void emit_macro() {
 	printf(".macro popaa ()\n");
 	printf("pop $a1\n");
 	printf("pop $a0\n");
-	printf(".end_macro\n");
-
-	printf(".macro pushall ()\n");
-	printf("	push $v0\n");
-	printf("	push $v1\n");
-	printf("	push $a0\n");
-	printf("	push $a1\n");
-	printf("	push $a2\n");
-	printf("	push $a3\n");
-	printf("	push $t0\n");
-	printf("	push $t1\n");
-	printf("	push $t2\n");
-	printf("	push $t3\n");
-	printf("	push $t4\n");
-	printf("	push $t5\n");
-	printf("	push $t6\n");
-	printf("	push $t7\n");
-	printf("	push $s0\n");
-	printf("	push $s1\n");
-	printf("	push $s2\n");
-	printf("	push $s3\n");
-	printf("	push $s4\n");
-	printf("	push $s5\n");
-	printf("	push $s6\n");
-	printf("	push $s7\n");
-	printf(".end_macro\n");
-	printf(".macro popall ()\n");
-	printf("	pop $s7\n");
-	printf("	pop $s6\n");
-	printf("	pop $s5\n");
-	printf("	pop $s4\n");
-	printf("	pop $s3\n");
-	printf("	pop $s2\n");
-	printf("	pop $s1\n");
-	printf("	pop $s0\n");
-	printf("	pop $t7\n");
-	printf("	pop $t6\n");
-	printf("	pop $t5\n");
-	printf("	pop $t4\n");
-	printf("	pop $t3\n");
-	printf("	pop $t2\n");
-	printf("	pop $t1\n");
-	printf("	pop $t0\n");
-	printf("	pop $a3\n");
-	printf("	pop $a2\n");
-	printf("	pop $a1\n");
-	printf("	pop $a0\n");//push all before the function call
-	/* printf("	pop $v1\n"); */
-	/* printf("	pop $v0\n"); */
 	printf(".end_macro\n");
 	return;
 }

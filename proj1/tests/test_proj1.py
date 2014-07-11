@@ -100,7 +100,7 @@ for f in tests:
     if errors:
         if Compile(f, dst):
             msg = "FAIL (wrong exit code)"
-        elif HasError (os.Stderr):
+        elif HasError (Stderr):
             msg = "OK"
         else:
             msg = "FAIL (no error message)"
@@ -108,11 +108,11 @@ for f in tests:
         std = Contents (os.path.join(dir, base + ".std"))
         if not Compile(f, dst):
             msg = "FAIL (wrong exit code)"
-        elif os.Stderr:
+        elif Stderr:
             msg = "FAIL (error messages)"
         elif not Execute(dst, Contents(inp)):
             msg = "FAIL (execution error)"
-        elif std and std != os.Stdout:
+        elif std and std != Stdout:
             msg = "FAIL (wrong output)"
         elif not Memcheck(f):
             msg = "FAIL (memory leaked)"

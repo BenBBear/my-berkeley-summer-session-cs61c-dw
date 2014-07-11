@@ -113,7 +113,6 @@ void pack_check_name_env(char * _x_,int _ma_,char *env, int is_top_level) {
 		if (smap_get(decls, _x_) == NOT_EXIST)
 		{
 			my_perror("Variable %s used before define", _x_);
-			exit(0);
 		}else{
 			smap_put(decls, _x_, _ma_);
 		}
@@ -125,7 +124,6 @@ void pack_check_name_env(char * _x_,int _ma_,char *env, int is_top_level) {
 			if(smap_get(decls,cut_env(_x_)) == NOT_EXIST)
 			{
 				my_perror("Variable %s used before define", _x_);
-				exit(0);
 			}
 		}else{
 			smap_put(decls, _x_, _ma_);
@@ -141,7 +139,7 @@ void parse_init() {
 
 	stack_sizes = smap_new();
     num_args = smap_new();
-    strings = smap_l_new();
+    /* strings = smap_l_new(); */
 
 
     keyword_str_to_enum = smap_new();
@@ -149,12 +147,12 @@ void parse_init() {
 }
 
 void parse_close() {
-    smap_del_contents(decls);
+
     smap_del(decls);
     smap_del(stack_sizes);
     smap_del(num_args);
 
-    smap_l_del(strings);
+    /* smap_l_del(strings); */
 
     smap_del(keyword_str_to_enum);
 }
@@ -164,7 +162,7 @@ void my_perror(const char *fmt, ...){
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
-	exit(0);
+	exit(EXIT_FAILURE);
 }
 
 
@@ -195,8 +193,8 @@ AST *build_ast (lexer *lex) { 	/* a big one!! */
 		/* read_token(lex); */
 		if (lex->type != token_CLOSE_PAREN){
 			free_ast(r_tree);
-			perror("Parentheses not match!!");
-			exit(0);
+			my_perror("Parentheses not match!!");
+
 		}else{
 			NOTHING;/* read_token(lex); */	/* if ok,skip this close  parentheses */
 		}
@@ -353,6 +351,7 @@ void check_tree_shape(AST *ptr) { /* only check the keyword and function call */
 		switch(ptr->type){
 		case node_FUNCTION:		/* also collect defun information */
 			if (AST_lst_len(ptr->children) == 0){
+				/* break; /\* empty function *\/ */
 				my_perror("you define a illegal function");
 			}
 			def = ptr->children;
@@ -365,13 +364,14 @@ void check_tree_shape(AST *ptr) { /* only check the keyword and function call */
 			break;
 		case node_WHILE:
 			if (AST_lst_len(ptr->children) == 0){
-				/* my_perror("you could not use a empty while"); */
-				Totally_Fine;
+				my_perror("you could not use a empty while");
+				/* Totally_Fine; */
 			}
 			break;
 		case node_FOR:
 			if (AST_lst_len(ptr->children) < 3){
-				Totally_Fine;
+				my_perror("you could not use a for with less than 3 arguments");
+				/* Totally_Fine; */
 			}
 			break;
 		case node_STRUCT:
@@ -413,6 +413,9 @@ int string_to_int(char *str){
 }
 /* (assign x 1) (function (fib x) (+ x y) (sequence x y)) */
 void gather_decls(AST *ast, char *env, int is_top_level) { /* fill in those strings,and desl */
+	if(ast == NULL)	{
+		return;
+	}
 	char *varname = NULL;								   /* also need to check use before define */
 	AST_lst* function_body = NULL;
 	AST_lst* arg_body = NULL;
@@ -425,7 +428,6 @@ void gather_decls(AST *ast, char *env, int is_top_level) { /* fill in those stri
 		if (strcmp(ast->children->val->val,"None") == 0)
 		{
 			my_perror("Could not assign to zero");
-			exit(0);
 		}
 		pack_name_env(ast->children->val->val,VALUE,env,is_top_level);
 		return;
@@ -438,7 +440,6 @@ void gather_decls(AST *ast, char *env, int is_top_level) { /* fill in those stri
 	case node_FUNCTION:			/* new env in here */
 		if(is_top_level == 0){
 			my_perror("Function define inside a function.");
-			exit(0);
 		}
 		arg_body = ast->children->val->children;
 		while(arg_body){
@@ -519,4 +520,4 @@ smap *num_args;					/* these one only used in the syntax checking phase ,keyword
 /////////////////////////////////////////////////////////
 smap *stack_sizes;
 smap *decls;
-smap_l *strings;
+/* smap_l *strings; */

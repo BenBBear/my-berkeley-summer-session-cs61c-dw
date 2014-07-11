@@ -1,0 +1,5 @@
+(assign x 10)
+
+(if (eq x 10)
+	(stringprint "x equals to 10")
+	(stringprint "if test fails!!"))

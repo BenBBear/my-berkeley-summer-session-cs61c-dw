@@ -1,0 +1,5 @@
+(assign x 1)
+(assign y 2)
+(stringprint (sequence (+ x y)
+					   (- x y)
+					   "1234"))

@@ -1,0 +1,2 @@
+(intprint 1)
+(stringprint "hello world!")

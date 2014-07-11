@@ -149,6 +149,13 @@ char* enum_to_str(node_type n){
 
 void print_ast_m(int t,AST* tree){
 	int i = 0;
+	if(tree == NULL){
+		for(i = 0;i<t;i++)
+			printf("\t");
+		printf("EMPTY NODE\n\n");
+		return;
+	}
+
 	for(i = 0;i<t;i++)
 		printf("\t");
 	printf("TYPE: %s\n", enum_to_str(tree->type));
@@ -159,8 +166,9 @@ void print_ast_m(int t,AST* tree){
 		printf("\t");
 	printf("CHILDREN:\n");
 	AST_lst* chd = tree->children;
+	t++;
 	while(chd){
-		print_ast_m(t++, chd->val);
+		print_ast_m(t, chd->val);
 		chd = chd->next;
 	}
 }
@@ -205,6 +213,7 @@ void compile(char *filename) {
 		check_tree_shape(ast);
 		gather_decls(ast, "", 1);
 		print_ast_m(0,ast);
+		printf("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n");
     }
 	///////////////the work above could be done without knowing mips
     /* Run code generation. */
@@ -250,29 +259,7 @@ int main(int argc, char* argv[]) {
 	var_addr = smap_new();
     compile(argv[1]);
 	smap_del(var_addr);
-	/* char fl[] = "source.lc"; */
-	/* FILE *fp; */
-	/* char*  input; */
-	/* while (1) { */
 
-	/* 	fp = fopen(fl, "w+"); */
-	/* 	input = readline("lispy> "); */
-
-	/* 	add_history(input); */
-
-
-
-	/* 	printf("%s\n",input); */
-
-	/* 	fputs(input,fp); */
-	/* 	fflush(fp); */
-
-	/* 	compile(fl); */
-
-	/* 	free(input); */
-	/* 	fclose(fp); */
-
-	/* } */
 
 
     return 0;

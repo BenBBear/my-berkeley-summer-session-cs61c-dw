@@ -90,8 +90,7 @@ void read_name(FILE *file,char *buffer){
 	char c = fgetc(file);
 	int l = 0;
 	if (NOT(VARIABLE_FIRST(c))){
-		perror("Variable Name should only begin with [a-zA-Z_]!");
-		exit(0);
+		my_perror("Variable Name should only begin with [a-zA-Z_]!");
 	} else {
 		buffer[l] = c;
 		l++;
@@ -194,15 +193,15 @@ void read_token(lexer *lex) {
 			ungetc(c, lex->file);
 			lex->type = token_NAME;
 			read_name(lex->file,lex->buffer);
+			if (strcmp(lex->buffer,"None") == 0)
+			{
+				lex->buffer[0] = '0';
+				lex->buffer[1] = '\0';
+				lex->type = token_INT;
+			}
 			return;
 		}
 		break;
-	}
-	if (strcmp(lex->buffer,"None") == 0)
-	{
-		lex->buffer[0] = '0';
-		lex->buffer[1] = '\0';
-		lex->type = token_INT;
 	}
 }
 

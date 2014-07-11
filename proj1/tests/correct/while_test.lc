@@ -1,0 +1,4 @@
+(assign x 1)
+(while (lt x 10)
+  (assign x (+ x 1))
+  (stringprint "helloword"))
