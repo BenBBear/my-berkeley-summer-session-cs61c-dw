@@ -28,4 +28,40 @@ void smap_del(smap *map);
 
 /** Deallocates all of the memory allocated to the strings in MAP. */
 void smap_del_contents(smap *map);
+
+
+
+
+
+
+
+
+
+
+typedef struct smap_l smap_l;
+
+/** Adds the the KV-pair (KEY, VALUE) to MAP, or updates the value associated
+ *  with KEY to VALUE if KEY already exists in MAP. */
+void smap_l_put(smap_l *map, char *key, long value);
+
+/** Returns the value associated with KEY in MAP, or -1 if it is not found. */
+long smap_l_get(smap_l *map, char *key);
+
+/** As smap_get(), but updates the value pointed to by SUCCESS to indicate
+ *  whether or not  there is a value associated with KEY in MAP. */
+long smap_l_get_extended(smap_l *map, char *key, int *success);
+
+/** Increases the value at KEY in MAP by AMT. If KEY does not yet exist in MAP
+ *  then acts as smap_put(). */
+void smap_l_increment(smap_l *map, char *key, long amt);
+
+/** Allocates a new smap on the heap and returns a pointer to it.*/
+smap_l* smap_l_new();
+
+/** Deallocates all of the memory allocated to MAP. */
+void smap_l_del(smap_l *map);
+
+/** Deallocates all of the memory allocated to the strings in MAP. */
+void smap_l_del_contents(smap_l *map);
+
 #endif

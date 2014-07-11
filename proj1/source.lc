@@ -1,0 +1,8 @@
+(assign x "123")
+(assign y 1)
+(function (fib x)
+ 	(assign x 9)
+	(sequence 
+	 	(and x y)))
+
+(intprint y)

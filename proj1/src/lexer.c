@@ -20,6 +20,7 @@
 #define NOT(x) !(x)
 #define NOT_EXIST -1
 #define TRIVIAL(x) x == ' '|| x == '\n' || x == '\t'
+#define BRACKET(x) x =='(' || x == ')'
 
 
 void init_lex(lexer *luthor) {
@@ -45,9 +46,7 @@ void close_file(lexer *lex) {
 	lex->buffer = NULL;
     }
 }
-void read_generic(FILE *file,char *buffer,char end){
 
-}
 
 void read_str(FILE *file,char *buffer){
 	char c = fgetc(file);
@@ -92,7 +91,7 @@ void read_name(FILE *file,char *buffer){
 	int l = 0;
 	if (NOT(VARIABLE_FIRST(c))){
 		perror("Variable Name should only begin with [a-zA-Z_]!");
-		return;
+		exit(0);
 	} else {
 		buffer[l] = c;
 		l++;
@@ -139,7 +138,7 @@ void read_token(lexer *lex) {
 			}
 
 			///////read a keyword or a token_name
-			while(NOT(TRIVIAL(c))){
+			while(NOT(TRIVIAL(c)||BRACKET(c))){
 				lex->buffer[l] = c;
 				l++;
 				c = fgetc(lex->file);
@@ -199,8 +198,12 @@ void read_token(lexer *lex) {
 		}
 		break;
 	}
-
-
+	if (strcmp(lex->buffer,"None") == 0)
+	{
+		lex->buffer[0] = '0';
+		lex->buffer[1] = '\0';
+		lex->type = token_INT;
+	}
 }
 
 token_type peek_type(lexer *lex) {

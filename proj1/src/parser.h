@@ -4,17 +4,33 @@
 #include "util/smap.h"
 #include "util/util.h"
 #include "lexer.h"
-
+#include <stdarg.h>
 typedef enum node_type {node_INT /* integer literal */,
 						node_STRING /* string literal*/,
 						node_VAR /* Name of a variable or a function. */,
 						node_CALL /* A call to a function */,
 						/* The different built-in utilitites. */
-						node_AND, node_OR, node_PLUS, node_MINUS, node_MUL,
-						node_LT, node_EQ, node_DIV, node_FUNCTION,
-						node_STRUCT, node_ARROW, node_ASSIGN, node_IF,
-						node_WHILE, node_FOR, node_SEQ, node_I_PRINT,
-						node_S_PRINT, node_READ_INT, node_READ_CHAR} node_type;
+						node_AND, /* O */
+						node_OR,  /* O */
+						node_PLUS,	   /* O */
+						node_MINUS,	   /* O */
+						node_MUL,	   /* O */
+						node_LT, /* O */
+						node_EQ, /* O */
+						node_DIV,	   /* O */
+						node_FUNCTION, /* O */
+						node_STRUCT,   /* O */
+						node_ARROW,	   /* O */
+						node_ASSIGN, /* O */
+						node_IF,	 /* O */
+						node_WHILE,	 /* O */
+						node_FOR, /* O */
+						node_SEQ, /* O */
+						node_I_PRINT, /* O */
+						node_S_PRINT, /* O */
+						node_READ_INT, /* O */
+						node_READ_CHAR /* O */
+} node_type;
 
 typedef struct AST AST;
 typedef struct AST_lst AST_lst;
@@ -74,6 +90,8 @@ extern smap *num_args;
 
 /** Holds a reference to each of the different string literals appearing throughout
  *  the program. */
-extern smap *strings;
+extern smap_l *strings;
 
+
+void my_perror(const char *fmt, ...);
 #endif

@@ -38,7 +38,7 @@ def Remove(file):
         pass
 
 def Contents(file):
-    try: 
+    try:
         f = open(file)
         r = f.read()
         f.close()
@@ -100,7 +100,7 @@ for f in tests:
     if errors:
         if Compile(f, dst):
             msg = "FAIL (wrong exit code)"
-        elif HasError (Stderr):
+        elif HasError (os.Stderr):
             msg = "OK"
         else:
             msg = "FAIL (no error message)"
@@ -108,11 +108,11 @@ for f in tests:
         std = Contents (os.path.join(dir, base + ".std"))
         if not Compile(f, dst):
             msg = "FAIL (wrong exit code)"
-        elif Stderr:
+        elif os.Stderr:
             msg = "FAIL (error messages)"
         elif not Execute(dst, Contents(inp)):
             msg = "FAIL (execution error)"
-        elif std and std != Stdout:
+        elif std and std != os.Stdout:
             msg = "FAIL (wrong output)"
         elif not Memcheck(f):
             msg = "FAIL (memory leaked)"
@@ -133,4 +133,3 @@ if OK == N:
 else:
     print "%d failed." % (N - OK)
     sys.exit(1)
-
