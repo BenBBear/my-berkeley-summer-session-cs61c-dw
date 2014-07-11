@@ -14,9 +14,9 @@
 
 #define NUMBER_OR_NUMBER_SIGN(x) (x >= '0' && x<= '9')
 
-#define VARIABLE_FIRST(x) (x>'A' && x <'Z') || (x>'a' && x<'z') || x == '_'
+#define VARIABLE_FIRST(x) (x>='A' && x <= 'Z') || (x>='a' && x <= 'z') || x == '_'
 
-#define VARIABLE_REST(x) (x>'A' && x <'Z') || (x>'a' && x<'z') || x == '_' || (x > '0' && x< '9')
+#define VARIABLE_REST(x) (x>'A' && x <= 'Z') || (x>='a' && x <='z') || x == '_' || (x >= '0' && x<= '9')
 #define NOT(x) !(x)
 #define NOT_EXIST -1
 #define TRIVIAL(x) x == ' '|| x == '\n' || x == '\t'

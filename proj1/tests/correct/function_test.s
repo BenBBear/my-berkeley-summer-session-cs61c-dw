@@ -30,7 +30,7 @@ LABEL0: .word 0
 	la $v1,LABEL0
 	lw $v0,0($v1)
 	push $v1
-	li $v0,5
+	li $v0,1
 	move $a1,$v0
 	pop $a0
 	sw $a1,0($a0)
