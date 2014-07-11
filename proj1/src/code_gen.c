@@ -28,6 +28,12 @@ unsigned int _number = 0;
 #define LOOP_LABEL_AGAIN _label
 #define LOOP_LABEL_OUT _label2
 
+#define AND_LABEL_NEXT _label
+#define AND_LABEL_FALSE _label2
+
+#define OR_LABEL_TRUE _label
+#define OR_LABEL_NEXT _label2
+
 
 char _stack[30];
 int push_counter = 0;
@@ -52,7 +58,20 @@ int assign_mark = 0;
 #define GET_LABEL()do{										\
 					  sprintf(_label,"LABEL%d",_number++);	\
 					  }while(0)
+#define GET_AND_LABEL_NEXT()do{								\
+		sprintf(_label,"LABEL%d",_number++);				\
+	}while(0)
+#define GET_AND_LABEL_FALSE()do{								\
+		sprintf(_label2,"LABEL%d",_number++);				\
+	}while(0)
 
+
+#define GET_OR_LABEL_NEXT()do{								\
+		sprintf(_label2,"LABEL%d",_number++);				\
+	}while(0)
+#define GET_OR_LABEL_TRUE()do{								\
+		sprintf(_label,"LABEL%d",_number++);				\
+	}while(0)
 #define GET_LABEL2()do{							\
 		sprintf(_label2,"LABEL%d",_number++);	\
 	}while(0)
@@ -76,6 +95,7 @@ int assign_mark = 0;
 #define LA(x,y)   printf("\tla %s,%s\n",x,y)
 #define LI(x,y) printf("\tli %s,%s\n",x,y)
 #define BEQ(x,y,b) printf("\tbeq %s,%s,%s\n",x,y,b)
+#define BNE(x,y,b) printf("\tbne %s,%s,%s\n",x,y,b)
 #define PUT_LABEL(x) printf("%s:\n",x)
 #define JAL(x) printf("\tjal %s\n",x)
 #define J(x) printf("\tj %s\n",x)
@@ -271,16 +291,24 @@ void emit_main(AST *ast,int fmark) {
 
 		case node_AND:
 			PROLOG_OF_TWO();
-
-			AND("$v0","$a0","$a1");
+			GET_AND_LABEL_FALSE();
+			MOVE("$v0","$zero");
+			BEQ("$a0","$zero",AND_LABEL_FALSE);
+			BEQ("$a1","$zero",AND_LABEL_FALSE);
+			LI("$v0","1");
+			PUT_LABEL(AND_LABEL_FALSE);
 
 			POPAA();
 			break;
 		case node_OR:
 			PROLOG_OF_TWO();
+			GET_OR_LABEL_TRUE();
+			LI("$v0","1");
+			BNE("$a0","$zero",OR_LABEL_TRUE);
+			BNE("$a1","$zero",OR_LABEL_TRUE);
+			MOVE("$v0","$zero");
 
-			OR("$v0","$a0","$a1");
-
+			PUT_LABEL(OR_LABEL_TRUE);
 			POPAA();
 			break;
 		case node_LT:
@@ -338,7 +366,14 @@ void emit_main(AST *ast,int fmark) {
 				PUSH("$v0");
 				chd = chd->next;
 			}
+			chd = ast->children;
 			JAL(ast->val);
+			while(chd){
+				/* emit_main(chd->val,fmark); */
+				POP("$zero");
+				chd = chd->next;
+			}
+
 
 			break;
 
@@ -464,7 +499,7 @@ void emit_functions(AST *ast) {
 		}
 		POP("$ra");
 		/* assert(STACK_COUNTER <= 0); */
-		REWIND_STACK();
+		/* REWIND_STACK(); */
 
 		JR("$ra");
 	}

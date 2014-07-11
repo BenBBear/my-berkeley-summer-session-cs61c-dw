@@ -2,3 +2,6 @@
 		  (if (and n (- n 1))
 			  (+ (fib (- n 1)) (fib ( - n 2)))
 			  n))
+
+(assign x 1)
+(intprint (fib x))

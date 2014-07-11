@@ -212,8 +212,8 @@ void compile(char *filename) {
 		/* /\* print_ast(ast); *\/ */
 		check_tree_shape(ast);
 		gather_decls(ast, "", 1);
-		print_ast_m(0,ast);
-		printf("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n");
+		/* print_ast_m(0,ast); */
+		/* printf("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n"); */
     }
 	///////////////the work above could be done without knowing mips
     /* Run code generation. */

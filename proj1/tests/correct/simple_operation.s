@@ -186,7 +186,11 @@ LABEL8: .asciiz "\n"
 	li $v0,3
 	move $a1,$v0
 	pop $a0
-	and $v0,$a0,$a1
+	move $v0,$zero
+	beq $a0,$zero,LABEL9
+	beq $a1,$zero,LABEL9
+	li $v0,1
+LABEL9:
 	popaa
 	move $a0,$v0
 	li $v0,1
@@ -206,7 +210,11 @@ LABEL8: .asciiz "\n"
 	li $v0,0
 	move $a1,$v0
 	pop $a0
-	or $v0,$a0,$a1
+	li $v0,1
+	bne $a0,$zero,LABEL10
+	bne $a1,$zero,LABEL10
+	move $v0,$zero
+LABEL10:
 	popaa
 	move $a0,$v0
 	li $v0,1
