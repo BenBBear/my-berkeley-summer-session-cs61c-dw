@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+(readint)
+=======
 (intprint (readint))
 (stringprint "\n")
 (intprint (readint))
+>>>>>>> newtest
