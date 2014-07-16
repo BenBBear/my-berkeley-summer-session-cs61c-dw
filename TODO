@@ -1,0 +1,13 @@
+# generate the ast tree:
+- understand the structure from top to down 
+- use test cases
+- prepare interface for code-gen
+
+
+# Note
+    decls = smap_new();  //hold all the declarations 
+    stack_sizes = smap_new(); //map from function name to their stack frame
+    num_args = smap_new();  //map from function name to their arg number
+    strings = smap_new(); .. //hold a reference to each string literal
+    keyword_str_to_enum = smap_new(); //for faster lookup of keywords->enum
+	

@@ -1,0 +1,12 @@
+(assign z 2)
+
+(function (hello x)
+		  (assign y "hello")
+		  (assign x "world")
+		  (stringprint y)
+		  (stringprint " ")
+		  (stringprint x)
+		  (intprint z))
+
+
+(hello 9)
