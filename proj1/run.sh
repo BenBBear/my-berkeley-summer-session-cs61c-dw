@@ -1,1 +1,0 @@
-./lifcc ./lifecc/test.lc
