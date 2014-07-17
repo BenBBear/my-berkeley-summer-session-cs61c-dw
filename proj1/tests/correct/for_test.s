@@ -55,6 +55,28 @@ LABEL9:
 	popaa
 	beq $v0,$zero,LABEL10
 	pushaa
+	la $v0,LABEL0
+	move $a0,$v0
+	li $v0,4
+	syscall
+	move $v0,$zero
+	popaa
+	pushaa
+	la $v1,LABEL7
+	lw $v0,0($v1)
+	move $a0,$v0
+	li $v0,1
+	syscall
+	move $v0,$zero
+	popaa
+	pushaa
+	la $v0,LABEL1
+	move $a0,$v0
+	li $v0,4
+	syscall
+	move $v0,$zero
+	popaa
+	pushaa
 	la $v1,LABEL7
 	lw $v0,0($v1)
 	push $v1
@@ -71,25 +93,6 @@ LABEL9:
 	pop $a0
 	sw $a1,0($a0)
 	move $v0,$a1
-	popaa
-	pushaa
-	la $v0,LABEL0
-	move $a0,$v0
-	li $v0,4
-	syscall
-	popaa
-	pushaa
-	la $v1,LABEL7
-	lw $v0,0($v1)
-	move $a0,$v0
-	li $v0,1
-	syscall
-	popaa
-	pushaa
-	la $v0,LABEL1
-	move $a0,$v0
-	li $v0,4
-	syscall
 	popaa
 	j LABEL9
 LABEL10:
@@ -115,6 +118,28 @@ LABEL11:
 	popaa
 	beq $v0,$zero,LABEL12
 	pushaa
+	la $v0,LABEL5
+	move $a0,$v0
+	li $v0,4
+	syscall
+	move $v0,$zero
+	popaa
+	pushaa
+	la $v1,LABEL7
+	lw $v0,0($v1)
+	move $a0,$v0
+	li $v0,1
+	syscall
+	move $v0,$zero
+	popaa
+	pushaa
+	la $v0,LABEL6
+	move $a0,$v0
+	li $v0,4
+	syscall
+	move $v0,$zero
+	popaa
+	pushaa
 	la $v1,LABEL7
 	lw $v0,0($v1)
 	push $v1
@@ -132,25 +157,6 @@ LABEL11:
 	sw $a1,0($a0)
 	move $v0,$a1
 	popaa
-	pushaa
-	la $v0,LABEL5
-	move $a0,$v0
-	li $v0,4
-	syscall
-	popaa
-	pushaa
-	la $v1,LABEL7
-	lw $v0,0($v1)
-	move $a0,$v0
-	li $v0,1
-	syscall
-	popaa
-	pushaa
-	la $v0,LABEL6
-	move $a0,$v0
-	li $v0,4
-	syscall
-	popaa
 	j LABEL11
 LABEL12:
 LABEL13:
@@ -160,6 +166,7 @@ LABEL13:
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	j LABEL13
 LABEL14:

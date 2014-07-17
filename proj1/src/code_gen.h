@@ -4,7 +4,6 @@
 #include "parser.h"
 
 /** Prints AST's string literals in the .data segment. */
-void emit_strings(AST *ast);
 
 
 /** Prints the appropriate code to allocate space in the .data segment
@@ -32,6 +31,7 @@ void emit_structs(AST* ast);
 
 void emit_globals(AST* ast);
 
+void emit_strings(AST *ast);
 
 extern smap* var_addr;
 #endif

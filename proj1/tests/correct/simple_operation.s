@@ -67,12 +67,14 @@ LABEL8: .asciiz "\n"
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v0,LABEL2
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	pushaa
@@ -88,12 +90,14 @@ LABEL8: .asciiz "\n"
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v0,LABEL3
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	pushaa
@@ -109,12 +113,14 @@ LABEL8: .asciiz "\n"
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v0,LABEL4
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	pushaa
@@ -130,12 +136,14 @@ LABEL8: .asciiz "\n"
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v0,LABEL5
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	pushaa
@@ -151,12 +159,14 @@ LABEL8: .asciiz "\n"
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v0,LABEL6
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	pushaa
@@ -171,12 +181,14 @@ LABEL8: .asciiz "\n"
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v0,LABEL7
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	pushaa
@@ -195,12 +207,14 @@ LABEL9:
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v0,LABEL8
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	pushaa
@@ -219,6 +233,7 @@ LABEL10:
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	li $v0 10
 	syscall

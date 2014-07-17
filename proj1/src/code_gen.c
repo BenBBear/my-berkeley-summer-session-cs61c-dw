@@ -218,6 +218,7 @@ char varaddress[20];
 void emit_main(AST *ast,int fmark) {
 	NULL_CHECK(ast);
 	AST_lst* chd = ast->children;
+	AST_lst* tmp_chd = NULL;
 	int struct_mem_count = 0;
 	if (ast->type == node_FUNCTION){
 		MOVE("$v0","$zero");
@@ -373,8 +374,6 @@ void emit_main(AST *ast,int fmark) {
 				POP("$zero");
 				chd = chd->next;
 			}
-
-
 			break;
 
 		case node_FOR:
@@ -384,13 +383,14 @@ void emit_main(AST *ast,int fmark) {
 
 			PUT_LABEL(FOR_LABEL_AGAIN);
 			emit_main(chd->next->val,fmark);
+			tmp_chd = chd;
 			BEQ("$v0","$zero",FOR_LABEL_OUT);
-			emit_main(chd->next->next->val,fmark);
 			chd = chd->next->next->next;
 			while(chd){
 				emit_main(chd->val,fmark);
 				chd = chd->next;
 			}
+			emit_main(tmp_chd->next->next->val,fmark);
 			J(FOR_LABEL_AGAIN);
 			PUT_LABEL(FOR_LABEL_OUT);
 			break;
@@ -401,9 +401,9 @@ void emit_main(AST *ast,int fmark) {
 			GET_LABEL2();
 			PUT_LABEL(LOOP_LABEL_AGAIN);
 			emit_main(ast->children->val, fmark);
-
 			BEQ("$v0","$zero",LOOP_LABEL_OUT);
 
+			chd = chd->next;
 			while(chd){
 				emit_main(chd->val,fmark);
 				chd = chd->next;
@@ -433,6 +433,7 @@ void emit_main(AST *ast,int fmark) {
 			MOVE("$a0","$v0");
 			LI("$v0","1");
 			SYSCALL();
+			MOVE("$v0","$zero");
 			POPAA();
 			break;
 		case node_S_PRINT:
@@ -441,6 +442,7 @@ void emit_main(AST *ast,int fmark) {
 			MOVE("$a0","$v0");
 			LI("$v0","4");
 			SYSCALL();
+			MOVE("$v0","$zero");
 			POPAA();
 			break;
 		case node_READ_INT:
@@ -467,7 +469,13 @@ void emit_exit() {
 
 
 void emit_functions(AST *ast) {
+	NULL_CHECK(ast);
 	if (ast->type != node_FUNCTION){
+		AST_lst* chd = ast->children;
+		while(chd){
+			emit_functions(chd->val);
+			chd = chd->next;
+		}
 		return;
 	}else{
 		AST_lst* BODY = ast->children->next;

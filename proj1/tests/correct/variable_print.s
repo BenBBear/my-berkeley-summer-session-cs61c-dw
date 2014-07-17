@@ -56,6 +56,7 @@ LABEL5: .word 0
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v1,LABEL5
@@ -63,6 +64,7 @@ LABEL5: .word 0
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	pushaa
@@ -78,6 +80,7 @@ LABEL5: .word 0
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	pushaa
@@ -93,6 +96,7 @@ LABEL5: .word 0
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v1,LABEL5
@@ -100,6 +104,7 @@ LABEL5: .word 0
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	li $v0 10
 	syscall

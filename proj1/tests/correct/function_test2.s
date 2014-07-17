@@ -73,12 +73,14 @@ hello:
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v0,LABEL3
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	add $v1,$sp,12
@@ -86,6 +88,7 @@ hello:
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	pushaa
 	la $v1,LABEL0
@@ -93,6 +96,7 @@ hello:
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	pop $ra
 	jr $ra

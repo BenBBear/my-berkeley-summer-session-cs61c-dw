@@ -68,6 +68,7 @@ LABEL1: .word 0
 	move $a0,$v0
 	li $v0,1
 	syscall
+	move $v0,$zero
 	popaa
 	li $v0 10
 	syscall

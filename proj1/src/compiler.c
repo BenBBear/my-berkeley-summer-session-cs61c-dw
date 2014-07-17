@@ -209,13 +209,11 @@ void compile(char *filename) {
 		append_ast_to_top_level(ast);  //a array of ast
 
 		read_token(&luthor);
-		/* /\* print_ast(ast); *\/ */
 		check_tree_shape(ast);
 		gather_decls(ast, "", 1);
 		/* print_ast_m(0,ast); */
 		/* printf("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n"); */
     }
-	///////////////the work above could be done without knowing mips
     /* Run code generation. */
 	emit_macro();
 	emit_static_memory();

@@ -52,6 +52,7 @@ LABEL2: .asciiz "if test fails!!"
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	j LABEL3
 LABEL4:
@@ -60,6 +61,7 @@ LABEL4:
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 LABEL3:
 	li $v0 10

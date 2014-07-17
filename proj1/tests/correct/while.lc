@@ -1,2 +1,3 @@
 (assign x 10)
-(while (assign x (- x 1)) (intprint (+ x (stringprint "\n"))))
+(while (assign x (- x 1))
+  (intprint (+ x (stringprint "\n"))))

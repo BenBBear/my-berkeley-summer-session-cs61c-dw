@@ -52,15 +52,6 @@ LABEL3:
 	pushaa
 	la $v1,LABEL2
 	lw $v0,0($v1)
-	push $v0
-	li $v0,10
-	move $a1,$v0
-	pop $a0
-	slt $v0,$a0,$a1
-	popaa
-	pushaa
-	la $v1,LABEL2
-	lw $v0,0($v1)
 	push $v1
 	pushaa
 	la $v1,LABEL2
@@ -81,6 +72,7 @@ LABEL3:
 	move $a0,$v0
 	li $v0,4
 	syscall
+	move $v0,$zero
 	popaa
 	j LABEL3
 LABEL4:

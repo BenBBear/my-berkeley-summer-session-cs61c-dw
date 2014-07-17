@@ -12,7 +12,7 @@
 
 #define NUMBER(x) (x >= '0' && x<= '9') || x == '+' || x == '-'
 
-#define NUMBER_OR_NUMBER_SIGN(x) (x >= '0' && x<= '9')
+#define NUMBER_OR_NUMBER_SIGN(x) (x >= '0' && x<= '9' || x == '+' || x == '-')
 
 #define VARIABLE_FIRST(x) (x>='A' && x <= 'Z') || (x>='a' && x <= 'z') || x == '_'
 
@@ -31,13 +31,14 @@ void init_lex(lexer *luthor) {
 }
 
 void open_file(lexer *lex, char *filename) {
-    if (lex) {
-	if (!lex->file) {
-	    fatal_error("Could not read input file.\n");
-	}
-	lex->buff_len = INIT_BUFFER_SIZE;
-	lex->buffer = safe_calloc(INIT_BUFFER_SIZE * sizeof(char));
-    }
+	if (lex) {
+		lex->file = fopen(filename, "r");
+		if (!lex->file) {
+			fatal_error("Could not read input file.\n");
+		}
+		lex->buff_len = INIT_BUFFER_SIZE;
+		lex->buffer = safe_calloc(INIT_BUFFER_SIZE * sizeof(char));
+	  }
 }
 
 void close_file(lexer *lex) {

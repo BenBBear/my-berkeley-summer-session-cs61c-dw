@@ -12,7 +12,7 @@
 		r_tree->children = m_child;							\
 		r_tree->last_child =m_last_child;					\
 	} while(0)
-
+int conditional_branch = 0;
 int fun_call_mark = 0;
 #define None 10
 #define FUNCALL_MARK() fun_call_mark = 1
@@ -26,9 +26,12 @@ int fun_call_mark = 0;
 #define NOT_EXIST -1
 #define ARGUMENT 4
 
-#define PLUS_ENV(x) do{ \
-	strcat(x, "-");		\
-	strcat(x,env);		\
+#define INSIDE_CONDITION 1
+
+
+#define PLUS_ENV(x) do{							\
+		strcat(x, "-");							\
+		strcat(x,env);							\
 	} while(0)
 
 #define PLUS_TOP_ENV(x) do{						\
@@ -91,9 +94,9 @@ void pack_name_env(char * _x_,int _ma_,char *env, int is_top_level) {
 		smap_put(decls, _x_, _ma_);
 	}else{
 		/* if (smap_get(decls, _x_) == NOT_EXIST){ */
-			strcat(_x_, "-");
-			strcat(_x_,env);
-			smap_put(decls, _x_, _ma_);
+		strcat(_x_, "-");
+		strcat(_x_,env);
+		smap_put(decls, _x_, _ma_);
 	}
 	return ;
 	/* } */
@@ -112,7 +115,10 @@ void pack_check_name_env(char * _x_,int _ma_,char *env, int is_top_level) {
 	if (is_top_level == 1){
 		if (smap_get(decls, _x_) == NOT_EXIST)
 		{
-			my_perror("Variable %s used before define", _x_);
+			if(conditional_branch == 0)
+				my_perror("Variable %s used before define", _x_);
+			else
+				my_perror("Variable %s declaration inside a conditional branch", _x_);
 		}else{
 			smap_put(decls, _x_, _ma_);
 		}
@@ -123,7 +129,10 @@ void pack_check_name_env(char * _x_,int _ma_,char *env, int is_top_level) {
 		{
 			if(smap_get(decls,cut_env(_x_)) == NOT_EXIST)
 			{
-				my_perror("Variable %s used before define", _x_);
+				if(conditional_branch == 0)
+					my_perror("Variable %s used before define", _x_);
+				else
+					my_perror("Variable %s declaration inside a conditional branch", _x_);
 			}
 		}else{
 			smap_put(decls, _x_, _ma_);
@@ -412,6 +421,7 @@ int string_to_int(char *str){
 	return strtol(str, (char **)NULL, 10);
 }
 /* (assign x 1) (function (fib x) (+ x y) (sequence x y)) */
+
 void gather_decls(AST *ast, char *env, int is_top_level) { /* fill in those strings,and desl */
 	if(ast == NULL)	{
 		return;
@@ -425,16 +435,19 @@ void gather_decls(AST *ast, char *env, int is_top_level) { /* fill in those stri
 	//////////////////////////////////////////////
 	switch(ast->type){
 	case node_ASSIGN:
-		if (strcmp(ast->children->val->val,"None") == 0)
-		{
-			my_perror("Could not assign to zero");
+		if (conditional_branch == 0){
+			gather_decls(ast->children->next->val, env, is_top_level);
+			pack_name_env(ast->children->val->val,VALUE,env,is_top_level);
+		}else{
+			gather_decls(ast->children->next->val, env, is_top_level);
+			pack_check_name_env(ast->children->val->val,VALUE,env,is_top_level);
 		}
-		pack_name_env(ast->children->val->val,VALUE,env,is_top_level);
-		return;
 
 		break;
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 	case node_VAR:
 		pack_check_name_env(varname,VALUE,env,is_top_level);
+
 		break;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	case node_FUNCTION:			/* new env in here */
@@ -452,16 +465,73 @@ void gather_decls(AST *ast, char *env, int is_top_level) { /* fill in those stri
 			gather_decls(function_body->val, ast->children->val->val, 0);
 			function_body = function_body->next;
 		}
-		return;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		break;
+	case node_IF:
+		if(conditional_branch == 0){
+			conditional_branch = 1;
+			while(subseq){
+				gather_decls(subseq->val,env, is_top_level);
+				subseq = subseq->next;
+			}
+			conditional_branch = 0;
+		}else{
+			while(subseq){
+				gather_decls(subseq->val,env, is_top_level);
+				subseq = subseq->next;
+			}
+		}
+		break;
+
+	case node_WHILE:
+		if(conditional_branch == 0){
+			gather_decls(subseq->val,env, is_top_level);
+			subseq = subseq->next;
+
+			conditional_branch = 1;
+			while(subseq){
+				gather_decls(subseq->val,env, is_top_level);
+				subseq = subseq->next;
+			}
+			conditional_branch = 0;
+		}else{
+			while(subseq){
+				gather_decls(subseq->val,env, is_top_level);
+				subseq = subseq->next;
+			}
+		}
+		break;
+
+	case node_FOR:
+		if(conditional_branch == 0){
+			gather_decls(subseq->val,env, is_top_level);
+			subseq = subseq->next;
+			gather_decls(subseq->val,env, is_top_level);
+			subseq = subseq->next;
+
+			conditional_branch = 1;
+			while(subseq){
+				gather_decls(subseq->val,env, is_top_level);
+				subseq = subseq->next;
+			}
+			conditional_branch = 0;
+		}else{
+			while(subseq){
+				gather_decls(subseq->val,env, is_top_level);
+				subseq = subseq->next;
+			}
+		}
+		break;
+
 	default:
+		while(subseq){
+			gather_decls(subseq->val,env, is_top_level);
+			subseq = subseq->next;
+		}
 		break;
 	}
-	while(subseq){
-		gather_decls(subseq->val,env, is_top_level);
-		subseq = subseq->next;
-	}
+
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 node_type lookup_keyword_enum(char *str) {
