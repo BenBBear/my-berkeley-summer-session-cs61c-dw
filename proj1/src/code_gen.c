@@ -12,7 +12,7 @@
 char _label[30];
 char _label2[30];
 unsigned int _number = 0;
-
+#define LAST_LABEL_NUMBER (_number - 1)
 
 
 #define PRE_MARK -7
@@ -56,24 +56,24 @@ int assign_mark = 0;
 #define NOT(x) !(x)
 
 #define GET_LABEL()do{										\
-					  sprintf(_label,"LABEL%d",_number++);	\
+					  sprintf(_label,"$LABEL%d",_number++);	\
 					  }while(0)
 #define GET_AND_LABEL_NEXT()do{								\
-		sprintf(_label,"LABEL%d",_number++);				\
+		sprintf(_label,"$LABEL%d",_number++);				\
 	}while(0)
 #define GET_AND_LABEL_FALSE()do{								\
-		sprintf(_label2,"LABEL%d",_number++);				\
+		sprintf(_label2,"$LABEL%d",_number++);				\
 	}while(0)
 
 
 #define GET_OR_LABEL_NEXT()do{								\
-		sprintf(_label2,"LABEL%d",_number++);				\
+		sprintf(_label2,"$LABEL%d",_number++);				\
 	}while(0)
 #define GET_OR_LABEL_TRUE()do{								\
-		sprintf(_label,"LABEL%d",_number++);				\
+		sprintf(_label,"$LABEL%d",_number++);				\
 	}while(0)
 #define GET_LABEL2()do{							\
-		sprintf(_label2,"LABEL%d",_number++);	\
+		sprintf(_label2,"$LABEL%d",_number++);	\
 	}while(0)
 
 #define PUSHAA()do{									\
@@ -94,11 +94,12 @@ int assign_mark = 0;
 #define SW(x,y) printf("\tsw %s,%s\n",x,y)
 #define LA(x,y)   printf("\tla %s,%s\n",x,y)
 #define LI(x,y) printf("\tli %s,%s\n",x,y)
-#define BEQ(x,y,b) printf("\tbeq %s,%s,%s\n",x,y,b)
-#define BNE(x,y,b) printf("\tbne %s,%s,%s\n",x,y,b)
+#define BEQ(x,y,b) printf("\tbeq %s,%s,$LABEL%d\n",x,y,b)
+#define BNE(x,y,b) printf("\tbne %s,%s,$LABEL%d\n",x,y,b)
 #define PUT_LABEL(x) printf("%s:\n",x)
+#define PUT_LABEL_BY_NUMBER(x) printf("$LABEL%d:\n",x)
 #define JAL(x) printf("\tjal %s\n",x)
-#define J(x) printf("\tj %s\n",x)
+#define J(x) printf("\tj $LABEL%d\n",x)
 #define JR(x) printf("\tjr %s\n",x)
 #define ADD(x,y,z) printf("\tadd %s,%s,%s\n",x,y,z)
 #define AND(x,y,z) printf("\tand %s,%s,%s\n",x,y,z)
@@ -229,7 +230,7 @@ void emit_main(AST *ast,int fmark) {
 			///////////////////////////////////////////////////////////////////////////single value
 		case node_VAR:
 			if (fmark == 0 || NOT(strchr(ast->val,'-'))){
-				sprintf(varaddress,"LABEL%d",smap_get(var_addr, ast->val));
+				sprintf(varaddress,"$LABEL%d",smap_get(var_addr, ast->val));
 
 				LA("$v1", varaddress);
 				LW("$v0","0($v1)");
@@ -290,27 +291,50 @@ void emit_main(AST *ast,int fmark) {
 			POPAA();
 			break;
 
-		case node_AND:
-			PROLOG_OF_TWO();
-			GET_AND_LABEL_FALSE();
-			MOVE("$v0","$zero");
-			BEQ("$a0","$zero",AND_LABEL_FALSE);
-			BEQ("$a1","$zero",AND_LABEL_FALSE);
+		case node_AND:	{		/* not short circuit */
+			PUSHAA();
+			GET_LABEL();
+			int FALSE = LAST_LABEL_NUMBER;
+			GET_LABEL();
+			int TRUE = LAST_LABEL_NUMBER;
+
+			emit_main(chd->val,fmark);
+			BEQ("$v0","$zero",FALSE);
+			emit_main(chd->next->val,fmark);
+			BEQ("$v0","$zero",FALSE);
 			LI("$v0","1");
-			PUT_LABEL(AND_LABEL_FALSE);
+			J(TRUE);
+
+			PUT_LABEL_BY_NUMBER(FALSE);
+			MOVE("$v0","$zero");
+			PUT_LABEL_BY_NUMBER(TRUE);
+
+
 
 			POPAA();
+		}
 			break;
-		case node_OR:
-			PROLOG_OF_TWO();
-			GET_OR_LABEL_TRUE();
-			LI("$v0","1");
-			BNE("$a0","$zero",OR_LABEL_TRUE);
-			BNE("$a1","$zero",OR_LABEL_TRUE);
-			MOVE("$v0","$zero");
+		case node_OR:	{		/* not short circuit */
+			PUSHAA();
+			GET_LABEL();
+			int FALSE = LAST_LABEL_NUMBER;
+			GET_LABEL();
+			int TRUE = LAST_LABEL_NUMBER;
 
-			PUT_LABEL(OR_LABEL_TRUE);
+			emit_main(chd->val,fmark);
+			BNE("$v0","$zero",TRUE);
+			emit_main(chd->next->val,fmark);
+			BNE("$v0","$zero",TRUE);
+			MOVE("$v0","$zero");
+			J(FALSE);
+
+
+			PUT_LABEL_BY_NUMBER(TRUE);
+			LI("$v0","1");
+			PUT_LABEL_BY_NUMBER(FALSE);
+
 			POPAA();
+		}
 			break;
 		case node_LT:
 			PROLOG_OF_TWO();
@@ -349,17 +373,21 @@ void emit_main(AST *ast,int fmark) {
 
 
 			////////////////////////////////////////////////////////////////////////////more args
-		case node_IF:
+		case node_IF:{
 			emit_main(ast->children->val,fmark);
 			GET_LABEL();
-			GET_LABEL2();		/* make sense until now */
-			BEQ("$v0","$zero",IF_LABEL_FALSE);
+			int FALSE = LAST_LABEL_NUMBER;
+			GET_LABEL();
+			int TRUE = LAST_LABEL_NUMBER;
+			BEQ("$v0","$zero",FALSE);
 			emit_main(ast->children->next->val,fmark);
-			J(IF_LABEL_TRUE);
-			PUT_LABEL(IF_LABEL_FALSE);
+			J(TRUE);
+			PUT_LABEL_BY_NUMBER(FALSE);
 			emit_main(ast->children->next->next->val,fmark);
-			PUT_LABEL(IF_LABEL_TRUE);
+			PUT_LABEL_BY_NUMBER(TRUE);
 			break;
+		}
+
 
 		case node_CALL:
 			while(chd){
@@ -376,32 +404,39 @@ void emit_main(AST *ast,int fmark) {
 			}
 			break;
 
-		case node_FOR:
+		case node_FOR:{
 			GET_LABEL();
-			GET_LABEL2();
+			int AGAIN = LAST_LABEL_NUMBER;
+			GET_LABEL();
+			int OUT = LAST_LABEL_NUMBER;
 			emit_main(chd->val,fmark); /* for's INIT */
 
-			PUT_LABEL(FOR_LABEL_AGAIN);
+			PUT_LABEL_BY_NUMBER(AGAIN);
 			emit_main(chd->next->val,fmark);
 			tmp_chd = chd;
-			BEQ("$v0","$zero",FOR_LABEL_OUT);
+			BEQ("$v0","$zero",OUT);
 			chd = chd->next->next->next;
 			while(chd){
 				emit_main(chd->val,fmark);
 				chd = chd->next;
 			}
 			emit_main(tmp_chd->next->next->val,fmark);
-			J(FOR_LABEL_AGAIN);
-			PUT_LABEL(FOR_LABEL_OUT);
+			J(AGAIN);
+			PUT_LABEL_BY_NUMBER(OUT);
+			MOVE("$v0","$zero");
 			break;
+		}
 
-		case node_WHILE:
+
+		case node_WHILE:{
 			PUSHAA();
 			GET_LABEL();
-			GET_LABEL2();
-			PUT_LABEL(LOOP_LABEL_AGAIN);
+			int AGAIN = LAST_LABEL_NUMBER;
+			GET_LABEL();
+			int OUT = LAST_LABEL_NUMBER;
+			PUT_LABEL_BY_NUMBER(AGAIN);
 			emit_main(ast->children->val, fmark);
-			BEQ("$v0","$zero",LOOP_LABEL_OUT);
+			BEQ("$v0","$zero",OUT);
 
 			chd = chd->next;
 			while(chd){
@@ -409,10 +444,12 @@ void emit_main(AST *ast,int fmark) {
 				chd = chd->next;
 			}
 
-			J(LOOP_LABEL_AGAIN);
-			PUT_LABEL(LOOP_LABEL_OUT);
+			J(AGAIN);
+			PUT_LABEL_BY_NUMBER(OUT);
+			MOVE("$v0","$zero");
 			POPAA();
 			break;
+		}
 		case node_SEQ:
 			PUSHAA();
 

@@ -3,7 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-
+#define NULL_CHECK(x) if(x == NULL){			\
+		return;									\
+	}
 #define ASTREE_NODE(r_tree,n_type,m_child,m_last_child)do {	\
 		r_tree = malloc(sizeof(AST));						\
 		r_tree->type = n_type;								\
@@ -25,6 +27,9 @@ int fun_call_mark = 0;
 #define VALUE 1
 #define NOT_EXIST -1
 #define ARGUMENT 4
+#define NOT(x) !(x)
+#define SHOULD_NOT_EXPLORE(x) x == node_VAR || x == node_INT || x == node_STRING
+
 
 #define INSIDE_CONDITION 1
 
@@ -180,6 +185,7 @@ AST *build_ast (lexer *lex) { 	/* a big one!! */
     /* TODO: Implement me. */
     /* Hint: switch statements are pretty cool, and they work
      *       brilliantly with enums. */
+
 	AST* r_tree = NULL;
 	switch(lex->type){
 	case token_STRING:
@@ -230,6 +236,9 @@ AST *build_ast (lexer *lex) { 	/* a big one!! */
 			if (lex->type == token_CLOSE_PAREN){
 				break;
 			}
+			if (lex->type == token_END){
+				my_perror("parentheses not match!!\n");
+			}
 			if(r_tree->children == NULL){
 				r_tree->children  = malloc(sizeof(AST_lst));
 				r_tree->children->next = NULL;
@@ -254,6 +263,9 @@ AST *build_ast (lexer *lex) { 	/* a big one!! */
 				if (lex->type == token_CLOSE_PAREN){
 					break;
 				}
+				if (lex->type == token_END){
+					my_perror("parentheses not match!!\n");
+				}
 				if(r_tree->children == NULL){
 					r_tree->children  = malloc(sizeof(AST_lst));
 					r_tree->children->next = NULL;
@@ -276,6 +288,9 @@ AST *build_ast (lexer *lex) { 	/* a big one!! */
 					read_token(lex);
 					if (lex->type == token_CLOSE_PAREN){
 						break;
+					}
+					if (lex->type == token_END){
+						my_perror("parentheses not match!!\n");
 					}
 					if(r_tree->children == NULL){
 						r_tree->children  = malloc(sizeof(AST_lst));
@@ -335,6 +350,10 @@ void free_ast (AST *ptr) {
 
 
 void check_tree_shape(AST *ptr) { /* only check the keyword and function call */
+	NULL_CHECK(ptr);
+	if (SHOULD_NOT_EXPLORE(ptr->type))
+		return;					/* no shape for them */
+
 	int num = lookup_num_args(ptr->val);
 	AST_lst* def;
 	char* fun_name,*fun_name_call;
@@ -368,6 +387,7 @@ void check_tree_shape(AST *ptr) { /* only check the keyword and function call */
 			a_num = AST_lst_len(def->val->children);
 			if (smap_get(num_args, fun_name)  == -1){
 				/* save this function argu number in the smap */
+
 				smap_put(num_args, fun_name, a_num);
 			}
 			break;
@@ -408,11 +428,15 @@ void check_tree_shape(AST *ptr) { /* only check the keyword and function call */
 			}
 			break;
 		default:
-			printf("%s",ptr->val);
-			my_perror("should not been here");
+			NOTHING;
 			break;
 		}
 		break;
+	}
+	AST_lst* chd = ptr->children;
+	while(chd){
+		check_tree_shape(chd->val);
+		chd = chd->next;
 	}
 }
 
@@ -423,9 +447,7 @@ int string_to_int(char *str){
 /* (assign x 1) (function (fib x) (+ x y) (sequence x y)) */
 
 void gather_decls(AST *ast, char *env, int is_top_level) { /* fill in those strings,and desl */
-	if(ast == NULL)	{
-		return;
-	}
+	NULL_CHECK(ast);
 	char *varname = NULL;								   /* also need to check use before define */
 	AST_lst* function_body = NULL;
 	AST_lst* arg_body = NULL;

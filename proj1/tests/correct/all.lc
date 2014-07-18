@@ -1,0 +1,31 @@
+(assign x 1)
+
+(assign y (struct 1 "helloword"))
+
+(assign z (+ 10
+			 (function (test_fun  x)
+						  (intprint x))))
+
+
+(function (get_1)
+		  1)
+
+(test_fun  (- (get_1) z) )
+
+
+
+(function (all x1 y1)
+		  (while (lt x1 10)
+			(if (eq x1 7)
+				(intprint (get_1))
+				None)
+			(while (lt y1 10)
+			  (assign y1 (+ 1 y1))
+			  (if (lt y1 5)
+				  (stringprint (arrow y 1))
+				  (intprint (arrow y 0)))
+			  (stringprint "\n"))
+			(assign y1 0)
+			(assign x1 (+ x1 1))))
+
+(all 0 0)
