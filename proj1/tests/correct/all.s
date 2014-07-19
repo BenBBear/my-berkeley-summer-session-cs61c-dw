@@ -23,12 +23,7 @@ $LABEL1: .asciiz "helloword"
 $LABEL2: .word 0 0 
 $LABEL3: .word 0
 $LABEL4: .word 0
-$LABEL5: .word 0
-$LABEL6: .word 0
-$LABEL7: .asciiz "\n"
-$LABEL8: .word 0
-$LABEL9: .word 0
-$LABEL10: .word 0
+$LABEL5: .asciiz "\n"
 	.text
 	.globl main
 	j  main
@@ -92,30 +87,39 @@ $LABEL10: .word 0
 	push $v0
 	jal test_fun
 	pop $zero
-	pushaa
-	la $v1,$LABEL10
-	lw $v0,0($v1)
-	push $v1
+	move $v0,$zero
 	li $v0,0
-	move $a1,$v0
-	pop $a0
-	sw $a1,0($a0)
-	move $v0,$a1
-	popaa
-	pushaa
-	la $v1,$LABEL9
-	lw $v0,0($v1)
-	push $v1
+	push $v0
 	li $v0,0
-	move $a1,$v0
-	pop $a0
-	sw $a1,0($a0)
-	move $v0,$a1
+	push $v0
+	jal all
+	pop $zero
+	pop $zero
+	li $v0 10
+	syscall
+test_fun:
+	push $ra
+	pushaa
+	add $v1,$sp,12
+	lw $v0,0($v1)
+	move $a0,$v0
+	li $v0,1
+	syscall
+	move $v0,$zero
 	popaa
+	pop $ra
+	jr $ra
+get_1:
+	push $ra
+	li $v0,1
+	pop $ra
+	jr $ra
+all:
+	push $ra
 	pushaa
-$LABEL11:
+$LABEL6:
 	pushaa
-	la $v1,$LABEL10
+	add $v1,$sp,24
 	lw $v0,0($v1)
 	push $v0
 	li $v0,10
@@ -123,11 +127,32 @@ $LABEL11:
 	pop $a0
 	slt $v0,$a0,$a1
 	popaa
-	beq $v0,$zero,$LABEL12
+	beq $v0,$zero,$LABEL7
 	pushaa
-$LABEL13:
+	add $v1,$sp,24
+	lw $v0,0($v1)
+	push $v0
+	li $v0,7
+	move $a1,$v0
+	pop $a0
+	seq $v0,$a0,$a1
+	popaa
+	beq $v0,$zero,$LABEL8
 	pushaa
-	la $v1,$LABEL9
+	jal get_1
+	move $a0,$v0
+	li $v0,1
+	syscall
+	move $v0,$zero
+	popaa
+	j $LABEL9
+$LABEL8:
+	li $v0,0
+$LABEL9:
+	pushaa
+$LABEL10:
+	pushaa
+	add $v1,$sp,28
 	lw $v0,0($v1)
 	push $v0
 	li $v0,10
@@ -135,15 +160,15 @@ $LABEL13:
 	pop $a0
 	slt $v0,$a0,$a1
 	popaa
-	beq $v0,$zero,$LABEL14
+	beq $v0,$zero,$LABEL11
 	pushaa
-	la $v1,$LABEL9
+	add $v1,$sp,28
 	lw $v0,0($v1)
 	push $v1
 	pushaa
 	li $v0,1
 	push $v0
-	la $v1,$LABEL9
+	add $v1,$sp,44
 	lw $v0,0($v1)
 	move $a1,$v0
 	pop $a0
@@ -154,6 +179,16 @@ $LABEL13:
 	sw $a1,0($a0)
 	move $v0,$a1
 	popaa
+	pushaa
+	add $v1,$sp,28
+	lw $v0,0($v1)
+	push $v0
+	li $v0,5
+	move $a1,$v0
+	pop $a0
+	slt $v0,$a0,$a1
+	popaa
+	beq $v0,$zero,$LABEL12
 	pushaa
 	pushaa
 	la $v1,$LABEL3
@@ -172,19 +207,40 @@ $LABEL13:
 	syscall
 	move $v0,$zero
 	popaa
+	j $LABEL13
+$LABEL12:
 	pushaa
-	la $v0,$LABEL7
+	pushaa
+	la $v1,$LABEL3
+	lw $v0,0($v1)
+	push $v0
+	li $v0,0
+	move $a1,$v0
+	pop $a0
+	mul $a1,$a1,4
+	add $a1,$a1,$a0
+	lw $v0,0($a1)
+	move $v1,$a1
+	popaa
+	move $a0,$v0
+	li $v0,1
+	syscall
+	move $v0,$zero
+	popaa
+$LABEL13:
+	pushaa
+	la $v0,$LABEL5
 	move $a0,$v0
 	li $v0,4
 	syscall
 	move $v0,$zero
 	popaa
-	j $LABEL13
-$LABEL14:
+	j $LABEL10
+$LABEL11:
 	move $v0,$zero
 	popaa
 	pushaa
-	la $v1,$LABEL9
+	add $v1,$sp,20
 	lw $v0,0($v1)
 	push $v1
 	li $v0,0
@@ -194,11 +250,11 @@ $LABEL14:
 	move $v0,$a1
 	popaa
 	pushaa
-	la $v1,$LABEL10
+	add $v1,$sp,24
 	lw $v0,0($v1)
 	push $v1
 	pushaa
-	la $v1,$LABEL10
+	add $v1,$sp,36
 	lw $v0,0($v1)
 	push $v0
 	li $v0,1
@@ -211,26 +267,9 @@ $LABEL14:
 	sw $a1,0($a0)
 	move $v0,$a1
 	popaa
-	j $LABEL11
-$LABEL12:
+	j $LABEL6
+$LABEL7:
 	move $v0,$zero
 	popaa
-	li $v0 10
-	syscall
-test_fun:
-	push $ra
-	pushaa
-	add $v1,$sp,12
-	lw $v0,0($v1)
-	move $a0,$v0
-	li $v0,1
-	syscall
-	move $v0,$zero
-	popaa
-	pop $ra
-	jr $ra
-get_1:
-	push $ra
-	li $v0,1
 	pop $ra
 	jr $ra

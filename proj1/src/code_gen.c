@@ -158,6 +158,7 @@ void emit_strings(AST *ast) {
 void emit_structs(AST *ast){
 	NULL_CHECK(ast);
 	unsigned int i = 0;
+	AST_lst* chd = ast->children;
 	if (ast->type == node_STRUCT){
 		GET_LABEL();
 		printf("%s: .word ",LABEL);
@@ -167,9 +168,12 @@ void emit_structs(AST *ast){
 
 		printf("\n");
 		strcpy(ast->val,LABEL);
+		while(chd){
+			emit_structs(chd->val);
+			chd = chd->next;
+		}
 		return;
 	}else{
-		AST_lst* chd = ast->children;
 		while(chd){
 			emit_structs(chd->val);
 			chd = chd->next;

@@ -89,7 +89,6 @@ for opt, val in opts:
 N = 0
 OK = 0
 
-print tests
 for f in tests:
     N += 1
     dir, file = os.path.split(f)

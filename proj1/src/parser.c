@@ -457,14 +457,25 @@ void gather_decls(AST *ast, char *env, int is_top_level) { /* fill in those stri
 	//////////////////////////////////////////////
 	switch(ast->type){
 	case node_ASSIGN:
-		if (conditional_branch == 0){
-			gather_decls(ast->children->next->val, env, is_top_level);
-			pack_name_env(ast->children->val->val,VALUE,env,is_top_level);
-		}else{
-			gather_decls(ast->children->next->val, env, is_top_level);
-			pack_check_name_env(ast->children->val->val,VALUE,env,is_top_level);
-		}
+		switch (ast->children->val->type){
+		case node_VAR:
+			if (conditional_branch == 0){
+				gather_decls(ast->children->next->val, env, is_top_level);
+				pack_name_env(ast->children->val->val,VALUE,env,is_top_level);
+			}else{
+				gather_decls(ast->children->next->val, env, is_top_level);
+				pack_check_name_env(ast->children->val->val,VALUE,env,is_top_level);
+			}
+		break;
+		case node_INT:case node_STRING:case node_STRUCT:
+			my_perror("You could not assign value to a scalar");
+			break;
 
+		default:
+			gather_decls(ast->children->val, env, is_top_level);
+			gather_decls(ast->children->next->val, env, is_top_level);
+			break;
+		}
 		break;
 		////////////////////////////////////////////////////////////////////////////////////////////////////
 	case node_VAR:
