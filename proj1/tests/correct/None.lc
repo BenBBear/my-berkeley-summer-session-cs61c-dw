@@ -1,3 +1,0 @@
-(intprint None)
-(stringprint "\n")
-(intprint (eq None 0))

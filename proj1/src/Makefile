@@ -11,7 +11,7 @@
 CC = gcc
 
 # Flags to use while compiling.
-CFLAGS = -std=gnu99 -Wall -g -ledit
+CFLAGS = -std=gnu99 -Wall -g
 
 # List of normal C sources.  Add any new ones here
 SRCS = compiler.c lexer.c parser.c code_gen.c util/util.c util/smap.c

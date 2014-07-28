@@ -7,8 +7,8 @@
 #include "parser.h"
 #include "code_gen.h"
 #include "util/util.h"
-#include <editline/readline.h>
-#include <editline/history.h>
+//#include <editline/readline.h>
+//#include <editline/history.h>
 #define MAX(X,Y) (X > Y ? X : Y)
 
 

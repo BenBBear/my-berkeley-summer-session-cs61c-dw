@@ -1,7 +1,0 @@
-(assign x 3)
-(assign y "hello")
-(intprint x)
-(stringprint y)
-(intprint (assign x 5))
-(stringprint (assign y "world"))
-(intprint y)
