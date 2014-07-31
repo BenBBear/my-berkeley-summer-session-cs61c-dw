@@ -1,0 +1,3 @@
+killall -KILL bench-fast
+killall -KILL bench-naive
+make

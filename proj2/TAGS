@@ -1,0 +1,29 @@
+
+benchmark.c,232
+#define TOL 14,274
+#define TSC_PER_SECOND 18,402
+static __inline__ unsigned long long rdtsc(19,437
+void die 26,647
+void fill 32,736
+void absolute_value 38,879
+void symmetrify 44,989
+int main(59,1436
+void eig_naive(153,4983
+
+benchmark.h,26
+#define BENCHMARK_H7,122
+
+check_submission.py,38
+def run(16,258
+def is_in_git(24,509
+
+eig-fast.c,15
+void eig(5,62
+
+eig-naive.c,16
+void eig(9,163
+
+Makefile,12
+HOME 5,239
+
+PARTNER.txt,0
