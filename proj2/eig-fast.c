@@ -7,24 +7,15 @@
 #include<nmmintrin.h>
 #include <stdarg.h>
 #include <malloc.h>
-#define blocksize 61
+#define blocksize 62
 #define TOL (5e-4)
 #define show(varname) fprintf(stderr, "%s = %d\n", #varname, varname); fflush(stdout)   //a debug macro : show(x); would print===> x = value_)of_x
 
 #define sentinel()  do { fprintf(stdout, "filename = %s  : line_number =  %d  : function =  %s()\n: " , __FILE__, \
 				 __LINE__, __func__);  fflush(stdout); } while (0)     //a debug macro : sentinel(); would print ===> filename:linenum:fun
-
-void my_perror(const char *fmt, ...){ //a error function: my_perror("error :%d",1); would print ====> error: 1, and exit the program.
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    exit(EXIT_FAILURE);
-}
-void transpose( int n , float *dst, float *src,int num_threads ) { /* transpose the n x n matrix src into dst, num_threads unexplained */
-#pragma omp  parallel
-    {
-	for (int i = omp_get_thread_num(); i <= n/blocksize; i+=num_threads)
+void transpose( int n , float *dst, float *src ) { /* transpose the n x n matrix src into dst, num_threads unexplained */
+#pragma omp  parallel for
+	for (int i = 0; i <= n/blocksize; i++)
 	    for (int j = 0; j <= n/blocksize ; j++){
 		for(int in_i = i*blocksize; in_i < (i + 1)*blocksize; in_i++)
 		    for(int in_j = j*blocksize; in_j < (j + 1)*blocksize; in_j++){
@@ -35,38 +26,37 @@ void transpose( int n , float *dst, float *src,int num_threads ) { /* transpose 
 			}
 		    }
 	    }
-    }
-}
+}	
 void padding_mat(int old_size,int new_size,float*new,float* old){ /* padding the 'old' matrix with old_size into 'new' matrix with new_size */
     float* jnew,*jold;
 #pragma omp  parallel  for  private(jnew,jold)
-	for (int  j = 0; j< old_size ; j++)	
-	    {
-		jnew = new+j*new_size;
-		jold = old+j*old_size;
-		for (int i = 0; i< old_size ; i++)
-		    jnew[i] = jold[i];
-	    }
+    for (int  j = 0; j< old_size ; j++)	
+	{
+	    jnew = new+j*new_size;
+	    jold = old+j*old_size;
+	    for (int i = 0; i< old_size ; i++)
+		jnew[i] = jold[i];
+	}
 }
 void assign(int old_size,int new_size,float* r,float* padding){ /* transfer the result contained in vector array 'padding' into vector array 'r' */
     float* pi,*ri;
 #pragma omp  parallel for private(pi,ri)
-	for (int  i = 0; i< old_size ; i++)	
-	    {
-		ri = r + i*old_size;
-		pi = padding + i*new_size;
-		for(int j = 0 ; j < old_size ; j++)
-		    ri[j] = pi[j];
-	    }
+    for (int  i = 0; i< old_size ; i++)	
+	{
+	    ri = r + i*old_size;
+	    pi = padding + i*new_size;
+	    for(int j = 0 ; j < old_size ; j++)
+		ri[j] = pi[j];
+	}
 }
 
 void determine_threads_num(int *num_threads,size_t n) /* given the size of the matrix n, determine the num_threads which used in OpenMp */
 {						  
-    if (n <= 128)
+    if (n <= 64)
 	{
 	    *num_threads = 8;
 	}
-    else if (n <= 256)
+    else if (n <= 128)
 	{
 	    *num_threads = 16;
 	}
@@ -95,7 +85,7 @@ void eig	(float *v, float *A, float *u, size_t n, unsigned iters) {
 	/* determine the threads num in openmp */
     int num_threads;
     determine_threads_num(&num_threads,n);
-    /* num_threads = 1; */
+	/* num_threads = 1; */
     omp_set_num_threads(num_threads);  
 	/* determine the padding size */
     int remain = n%PADDING;
@@ -118,50 +108,43 @@ void eig	(float *v, float *A, float *u, size_t n, unsigned iters) {
 	    padding_mat(n,n_m,u_m,u); 
 	    padding_mat(n,n_m,A_p,A);
 	}
-    
-	/* A_tp is the transpose of the padding matrix */
     A_tp = MEM_CHUNK(n_m);
-    transpose(n_m,A_tp,A_p,num_threads);
-	/* some local variable */
-    int rb1,rb2,rb3;
-    float norm,tmp_flt;
+    transpose(n_m,A_tp,A_p);
 
-    __m128 tmp;
+    float norm,tmp_flt;
+    __m128 tmp ALIGN(16);
     float tmp_p[4] ALIGN(16);
-    __m128 tmp2;
+    __m128 tmp2 ALIGN(16);
     float *v_m_temp,*u_m_temp,*A_tp_temp;
-    /* show(iters); */
-    /* iters = iters*9/10; */
-    /* show(iters); */
-    for (size_t k = 0; k < iters; k += 1) {
+    int n_rb2 = n*n_m;
+    
+    for (size_t k = 0; k < iters; ++k) {
 	my_memset(v_m,n_m*n_m);
-#pragma omp parallel for  private(rb1  ,  rb2  ,tmp  , rb3  ,   norm  ,  tmp_p , tmp2 , u_m_temp,v_m_temp,tmp_flt,A_tp_temp) /* use openmp in the main loop */
-	for (size_t l = 0; l < n; l ++) {
-		rb2 = n_m*l;
-		norm = 0.0;
-		for (size_t i = 0; i < n_m; i += 1) {
-		    A_tp_temp = A_tp + i*n_m - 4;		    
-		    tmp  = _mm_setzero_ps();
-		    u_m_temp = u_m+rb2 - 4;
-		    for (size_t j = 0; j < n_m; j += PADDING) {
-			tmp =  _mm_add_ps (tmp,_mm_mul_ps (_mm_load_ps(u_m_temp+=4),_mm_load_ps(A_tp_temp+=4))); /* !!!!!!the Key Change!!!!!!!!! */
-			tmp =  _mm_add_ps (tmp,_mm_mul_ps (_mm_load_ps(u_m_temp+=4),_mm_load_ps(A_tp_temp+=4))); 
-		    }
-		    _mm_store_ps(tmp_p, tmp);
-		    tmp_flt = (tmp_p[0]+tmp_p[1]+tmp_p[2]+tmp_p[3]);
-		    v_m[i+rb2] = tmp_flt;
-		    norm += tmp_flt*tmp_flt;
+#pragma omp parallel for  private(tmp ,   norm  ,  tmp_p , tmp2 , u_m_temp,v_m_temp,tmp_flt,A_tp_temp)
+	for (size_t rb2 = 0;rb2 < n_rb2; rb2+=n_m) {
+	    norm = 0.0;
+	    for (size_t i = 0; i < n_m; ++i) {
+		A_tp_temp = A_tp + i*n_m - 4;		    
+		tmp  = _mm_setzero_ps();
+		u_m_temp = u_m + rb2 - 4;
+		for (size_t j = 0; j < n_m; j += PADDING) {
+		    tmp =  _mm_add_ps (tmp,_mm_mul_ps (_mm_load_ps(u_m_temp+=4),_mm_load_ps(A_tp_temp+=4)));
+		    tmp =  _mm_add_ps (tmp,_mm_mul_ps (_mm_load_ps(u_m_temp+=4),_mm_load_ps(A_tp_temp+=4))); 
 		}
-		norm = sqrt(norm);
-		v_m_temp = v_m+rb2 - 4;
-		u_m_temp = u_m+rb2 - 4;
-		tmp2 = _mm_set_ps (norm,norm,norm,norm);
-		for (size_t i = 0; i < n_m; i += PADDING) {
-		    _mm_store_ps(u_m_temp+=4,_mm_div_ps ( _mm_load_ps(v_m_temp+=4) ,tmp2));
-		    _mm_store_ps(u_m_temp+=4,_mm_div_ps ( _mm_load_ps(v_m_temp+=4) ,tmp2));
-		}
-	    }	
-	
+		_mm_store_ps(tmp_p, tmp);
+		tmp_flt = (tmp_p[0]+tmp_p[1]+tmp_p[2]+tmp_p[3]);
+		v_m[i+rb2] = tmp_flt;
+		norm += tmp_flt*tmp_flt;
+	    }
+	    norm = sqrt(norm);
+	    v_m_temp = v_m+rb2 - 4;
+	    u_m_temp = u_m+rb2 - 4;
+	    tmp2 = _mm_set_ps (norm,norm,norm,norm);
+	    for (size_t i = 0; i < n_m; i += PADDING) {
+		_mm_store_ps(u_m_temp+=4,_mm_div_ps ( _mm_load_ps(v_m_temp+=4) ,tmp2));
+		_mm_store_ps(u_m_temp+=4,_mm_div_ps ( _mm_load_ps(v_m_temp+=4) ,tmp2));
+	    }
+	}		
     }
     free(A_tp);
     if (n != n_m)

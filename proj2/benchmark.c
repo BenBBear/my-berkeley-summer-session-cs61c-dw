@@ -20,6 +20,7 @@
 // NOTE : this constant varies per machine
 // this is for the hive machines (Intel Xeon E5620 @ 2.4GHz)
 #define TSC_PER_SECOND (2400*1e6)
+/* float total = 0.0; */
 static __inline__ unsigned long long rdtsc(void)
 {
     unsigned hi, lo;
@@ -111,6 +112,7 @@ int main( int argc, char **argv )
 
 		    /* compute Gflop/s rate */
 		Gflop_s = 1e-9 * n_iterations * ITERATIONS * n * (3*n + 2*n*n) / seconds;
+		/* total += Gflop_s; */
         }
 
         printf( "%d by %d matrix \t %g Gflop/s\n", n, n, Gflop_s );
@@ -152,7 +154,8 @@ int main( int argc, char **argv )
         free(A2);
         free(u2);
         free(v2);
-    }
+	    }
+	/* printf("average Gflops is %f\n:",total/(sizeof(test_sizes)/sizeof(test_sizes[0]))); */
     return 0;
 }
 

@@ -1,24 +1,53 @@
 
-benchmark.c,232
+benchmark.c,255
 #define TOL 14,274
-#define TSC_PER_SECOND 18,402
-static __inline__ unsigned long long rdtsc(19,437
-void die 26,647
-void fill 32,736
-void absolute_value 38,879
-void symmetrify 44,989
-int main(59,1436
-void eig_naive(153,4983
+#define show(16,314
+#define TSC_PER_SECOND 22,578
+static __inline__ unsigned long long rdtsc(23,613
+void die 30,823
+void fill 36,912
+void absolute_value 42,1055
+void symmetrify 48,1165
+int main(63,1612
+void eig_naive(161,5199
+
+benchmark.c.orig,204
+#define TOL 14,274
+#define show(16,307
+#define TSC_PER_SECOND 22,559
+void die 30,804
+void fill 36,893
+void absolute_value 42,1036
+void symmetrify 48,1146
+int main(63,1593
+void eig_naive(161,5196
 
 benchmark.h,26
 #define BENCHMARK_H7,122
+
+benchmark.o,17
+EE16,12507
 
 check_submission.py,38
 def run(16,258
 def is_in_git(24,509
 
-eig-fast.c,15
-void eig(5,62
+eig-fast.c,361
+#define blocksize 10,177
+#define TOL 11,198
+#define show(12,217
+#define sentinel(14,365
+void my_perror(17,609
+void transpose(24,855
+void padding_mat(40,1423
+void assign(51,1802
+void determine_threads_num(63,2176
+void	my_memset(80,2469
+#define PADDING 90,2695
+#define BLOCK 91,2713
+#define MEM_CHUNK(92,2730
+#define ALIGN(93,2785
+void eig	94,2832
 
 eig-naive.c,16
 void eig(9,163
@@ -26,4 +55,22 @@ void eig(9,163
 Makefile,12
 HOME 5,239
 
+proj2.marker,244
+This file is used by our grading scripts to locate your project 2 submission inside your git repo. Do not remove,1,0
+This file is used by our grading scripts to locate your project 2 submission inside your git repo. Do not remove, rename,1,0
+
+TAGS,0
+
 PARTNER.txt,0
+
+log,0
+
+go,0
+
+eig-naive.o,0
+
+eig-fast.o,0
+
+bench-naive,0
+
+bench-fast,0
