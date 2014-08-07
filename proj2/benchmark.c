@@ -109,7 +109,7 @@ int main( int argc, char **argv )
             end = rdtsc();
             seconds = (end - start)/TSC_PER_SECOND;
 
-            /* compute Gflop/s rate */
+		    /* compute Gflop/s rate */
 		Gflop_s = 1e-9 * n_iterations * ITERATIONS * n * (3*n + 2*n*n) / seconds;
         }
 

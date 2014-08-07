@@ -8,7 +8,7 @@
 #include <stdarg.h>
 #include <malloc.h>
 #define blocksize 61
-
+#define TOL (5e-4)
 #define show(varname) fprintf(stderr, "%s = %d\n", #varname, varname); fflush(stdout)   //a debug macro : show(x); would print===> x = value_)of_x
 
 #define sentinel()  do { fprintf(stdout, "filename = %s  : line_number =  %d  : function =  %s()\n: " , __FILE__, \
@@ -130,7 +130,9 @@ void eig	(float *v, float *A, float *u, size_t n, unsigned iters) {
     float tmp_p[4] ALIGN(16);
     __m128 tmp2;
     float *v_m_temp,*u_m_temp,*A_tp_temp;
-    
+    /* show(iters); */
+    /* iters = iters*9/10; */
+    /* show(iters); */
     for (size_t k = 0; k < iters; k += 1) {
 	my_memset(v_m,n_m*n_m);
 #pragma omp parallel for  private(rb1  ,  rb2  ,tmp  , rb3  ,   norm  ,  tmp_p , tmp2 , u_m_temp,v_m_temp,tmp_flt,A_tp_temp) /* use openmp in the main loop */
