@@ -1,0 +1,16 @@
+ADD $a0 $a0 1 #won't read now
+ADD $a1 $a1 2147 #a1=2147
+DIV $a1 $a1 0
+ADD $a2 $a2 -1  #a2=-1
+MUL $t4 $a1 $a2 #t4=-2147, but showed 8588, need to be fixed
+MUL $t6 $a1 -1 #t6=-2147, imm works normally
+MUL $t7 $a1 2 #t7=4294
+DIV $t5 $t4 0 #t5=t4, but an error will show up
+MUL $t7 $a1 2 #t7=4294
+
+
+
+
+
+	
+	

@@ -1,0 +1,12 @@
+ADD $a0 $a0 1       #not read
+ADD $a1 $a1 0b1111
+ADD $a2 $a2 28
+ADD $a3 $a3 0x1111
+SHL $t0 $a1 4       #t0=0xf0->240
+SHL $t1 $a1 32      #t1=0
+SHL $t2 $a1 $a2     #t2=0xf000->some negative number
+SHR $t3 $a1 2       #t3=0b11->3
+SHR $t4 $a3 1       #t4= 0b0111....1->negative changed to positive
+SHR $t5 $a3 $a2     #t5= 0x000f->15
+END
+	

@@ -1,0 +1,11 @@
+ADD $a0 $a0 0
+ADD $a1 $a1 4
+ADD $a2 $a2 20
+MST $a1 0($a2) #address 0=4
+MST $a2 1($a2) #address 1=20
+MLD $t2 0($a2) #t2=4
+MLD $t3 1($a2) #t3=20
+ 
+MST $a2 $a1($a1) #set address8 =20
+MLD $t4 $a1($a1)  #t4=20
+

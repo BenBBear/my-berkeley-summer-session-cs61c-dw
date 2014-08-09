@@ -1,0 +1,11 @@
+#!/bin/bash
+
+java -jar ./Check.jar ./ALU.circ
+java -jar ./Check.jar ./CPU.circ
+java -jar ./Check.jar ./CMP.circ
+java -jar ./Check.jar ./PIP.circ
+java -jar ./Check.jar ./NPC.circ
+java -jar ./Check.jar ./REG.circ 
+
+
+

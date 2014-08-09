@@ -1,0 +1,10 @@
+ADD $a1 $a1 4
+LNK $t0 4         #$t0=6, pc=2
+LNK $t1 $a1       #t1=7,pc=3
+JMP $a1          #pc=6
+ADD $a0 $a0 1     #this line should be ignore
+ADD $t2 $a1 $a1   #ts=8 , should be excuted 
+JMP 10
+ADD $t3 $t2 $t2   #should be ignored
+ADD $t4 $t3 $t3   #should be ignored
+SUB $t5  1  $a1   #t5=-3

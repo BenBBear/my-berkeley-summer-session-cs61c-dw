@@ -1,0 +1,24 @@
+ADD $a0 $a0 1 #won't read now
+ADD $a1 $a1 2147 #a1=2147
+ADD $a2 $a2 -1  #a2=-1
+ADD $a3 $a3 -2147  #a3=-2147
+SUB $t1 2 $a2 #t1=2--1=3
+ADD $t2 $t2 3
+SUB $t2 0 $t2 #t2=-3
+ADD $t3 $a1 $a2 #t3=2146
+#after STL & STU work, test overflow
+STL $t4 0xffff
+STU $t4 $t4 0x7fff #t4=0b01111111.....11
+ADD $t5 $t5 1 #t5=1
+ADD $t6 $t5 $t4 #should be a positive overflow
+STL $t7 0x0000
+STU $t7 $t7 0x8000 #t7=100000....0
+ADD $t8 $t7 $t7 #should be a negative overflow
+
+
+
+
+
+
+	
+	

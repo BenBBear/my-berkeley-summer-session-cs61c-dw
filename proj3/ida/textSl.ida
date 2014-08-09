@@ -1,0 +1,4 @@
+MOV $a0 1
+CMP $a0 1
+MOV ?LE $rv $a0     
+

@@ -1,0 +1,18 @@
+ADD $a0 $a0 2 #won't be read
+ADD $a1 $a1 15      #1111
+ADD $a2 $a2 16      #10000
+ADD $a3 $a3 0b110111
+AND $t0 $a2 $a3     #t0=0b1000->8
+AND $t1 $a1 $a3     #t1=0b111->7
+
+ADD $t2 $t2 0b1100  
+ADD $t3 $t3 0b1010
+AND $t4 $t3 $t2     #t4=0b1000 
+IOR $t5 $t3 $t2     #t5=0b1110
+XOR $t6 $t3 $t2     #t6=0b0110
+
+AND $t7 $t2 0b1010  #t7=0b1000
+IOR $a0 $t2 0b1010  #a0=0b1110
+XOR $t8 $t2 0b1010  #a8=0b0110
+
+END

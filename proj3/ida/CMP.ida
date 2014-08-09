@@ -1,0 +1,18 @@
+ADD $a0 $a0 0 #ignore
+ADD $a1 $a1 4
+ADD $a2 $a2 5
+ADD $a3 $a3 3
+
+CMP $a1 $a1
+ADD $t0 $CR 0  #t0=0b010->2
+
+CMP $a1 $a2
+ADD $t1 $CR 0  #t1=0b100->4
+
+CMP $a1 $a3
+ADD $t2 $CR 0  #t2=0b001->1
+
+CMP $a1 6
+ADD $t3 $CR 0  #t3=0b100->4
+END
+

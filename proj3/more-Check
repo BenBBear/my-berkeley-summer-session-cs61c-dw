@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd ./ida
+rm -f ./*.hex
+for x in `ls`
+do
+	java -jar ../Assemble.jar $x
+done
+cd ..

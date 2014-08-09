@@ -1,0 +1,11 @@
+ADD $a0 $a0 0
+STL $t0 0x7D76
+STU $t0 $t0 0x8234 #t0=0x82347D76
+
+STU $t1 $t1 0x7D76 #t1=0x82347D76
+STL $t1 0x8234
+
+STL $t2 0x9BEEF #0xFFF9BEEF
+STU $t2 $t2 0xDEAD #t2=deadbeef
+
+
